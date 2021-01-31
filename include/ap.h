@@ -26,7 +26,7 @@
 #define AP_H
 #include "md.h"
 /*--------------------------------------------------------------------------*/
-INTERFACE char* getcmd(const char*,char*,int);
+INTERFACE void getcmd(const char*,std::string &);
 /*--------------------------------------------------------------------------*/
 enum AP_MOD{
   mNONE,	/* nothing special */

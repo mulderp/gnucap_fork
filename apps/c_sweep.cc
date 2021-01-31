@@ -66,13 +66,14 @@ static void buildfile(CS& cmd)
   fprintf(fptr, "%s\n", cmd.fullstring().c_str());
   
   for (;;) {
-    char buffer[BUFLEN];
-    getcmd(">>>", buffer, BUFLEN);
-    if (Umatch(buffer,"go ")) {
+    //char buffer[BUFLEN];
+    std::string line;
+    getcmd(">>>", line);
+    if (Umatch(line.c_str(),"go ")) {
       break;
     }else{
     }
-    fprintf(fptr, "%s\n", buffer);
+    fprintf(fptr, "%s\n", line.c_str());
   }
   fclose(fptr);
   fptr = NULL;

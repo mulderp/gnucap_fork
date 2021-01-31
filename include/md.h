@@ -69,7 +69,7 @@ enum {
 };
 /*--------------------------------------------------------------------------*/
 /* user interface preferences */
-#define I_PROMPT "gnucap> "
+#define I_PROMPT "gnucap_ln> "
 #define CKT_PROMPT ">"
 #define ANTI_COMMENT "*>"
 /*--------------------------------------------------------------------------*/

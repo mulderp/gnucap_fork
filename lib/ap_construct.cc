@@ -25,10 +25,8 @@
 #include "u_opt.h"
 #include "ap.h"
 
-#if defined(HAVE_LIBREADLINE)
-  #include <readline/readline.h>
-  #include <readline/history.h>
-#endif
+#include <linenoise.hpp>
+
 /*--------------------------------------------------------------------------*/
 static std::string getlines(FILE*);
 OMSTREAM mout; // > file bitmap //BUG//encapsulation
@@ -154,9 +152,9 @@ CS& CS::get_line(const std::string& prompt)
     _ok = true;
   }else{itested();
     assert(_file == stdin);
-    char cmdbuf[BUFLEN];
-    getcmd(prompt.c_str(), cmdbuf, BUFLEN);
-    _cmd = cmdbuf;
+    std::string cmdbuf;
+    getcmd(prompt.c_str(), cmdbuf);
+    _cmd = cmdbuf.c_str();
     _cnt = 0;
     _length = _cmd.length();
     _ok = true;
@@ -168,59 +166,51 @@ CS& CS::get_line(const std::string& prompt)
   }
   return *this;
 }
+
 /*--------------------------------------------------------------------------*/
 /* getcmd: get a command.
  * if "fin" is stdin, display a prompt first.
  * Also, actually do logging, echo, etc.
  */
-char *getcmd(const char *prompt, char *buffer, int buflen)
-{
+void getcmd(const char *prompt, std::string & line) {
+
   assert(prompt);
-  assert(buffer);
+  //assert(buffer);
   if (isatty(fileno(stdin))) {
     // stdin is keyboard
-#if defined(HAVE_LIBREADLINE)
     if (OPT::edit) {
-      char* line_read = readline(prompt);
-      if (!line_read) {itested();
-	throw Exception_End_Of_Input("EOF on stdin");
-      }else{
-      }
-      // readline gets a new buffer every time, so copy it to where we want it
-      char* end_of_line = (char*)memccpy(buffer, line_read, 0, static_cast<size_t>(buflen-1));
-      if (!end_of_line) {
-	buffer[buflen-1] = '\0';
-      }else{
-	*end_of_line = '\0';
-      }
-      free(line_read);
-      
-      if (*buffer) {
-	add_history(buffer);
-      }else{
-      }
-    }else
-#endif
-      {
-	IO::mstdout << prompt;	/* prompt & flush buffer */
-	if (!fgets(buffer, buflen, stdin)) {untested();	/* read line */
-	  throw Exception_End_Of_Input("EOF on stdin");
-	}else{
-	}
-      }
-    (IO::mstdout - mout) << '\r';	/* reset col counter */
-    trim(buffer);
-    (mlog + mout) << buffer << '\n';
-    return buffer;
+      // char* line_read = readline(prompt);
+      auto line_read = linenoise::Readline(prompt, line);
+
+      //if (!line_read) {itested();
+      //  throw Exception_End_Of_Input("EOF on stdin");
+      //}else{
+      //}
+
+      linenoise::AddHistory(line.c_str());
+    } else {
+      //IO::mstdout << prompt;	/* prompt & flush buffer */
+      //if (!fgets(buffer, buflen, stdin)) {untested();	/* read line */
+      //  throw Exception_End_Of_Input("EOF on stdin");
+      //}else{
+      //}
+    }
+    //(IO::mstdout - mout) << '\r';	/* reset col counter */
+    //trim(buffer);
+    //(mlog + mout) << buffer << '\n';
+    //return buffer;
+    return;
   }else{
     // stdin is file
+    char* buffer;
+    int buflen;
     if (!fgets(buffer, buflen, stdin)) {itested();	/* read line */
       throw Exception_End_Of_Input("EOF on stdin");
     }else{
     }
     trim(buffer);
     (mlog + mout) << buffer << '\n';
-    return buffer;
+    return ;
   }
 }
 /*--------------------------------------------------------------------------*/

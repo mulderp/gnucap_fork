@@ -47,13 +47,14 @@ void xclose(FILE **fn)
  */
 FILE *xopen(CS& cmd, const char *ext, const char *how)
 {
-  char fname[BIGBUFLEN];
+  //char fname[BIGBUFLEN];
+  std::string fname;
   
   cmd.skipbl();
   if (cmd.is_end()) {untested();
-    cmd = getcmd("file name?  ",fname, BIGBUFLEN);
+    getcmd("file name?  ",fname);
   }
-					/* copy the name		    */
+  /* copy the name		    */
   cmd.skipbl();				/* and while we're at it ...	    */
   {					/* find out if we want to add the   */
     bool defalt = true;			/* default extension		    */
@@ -61,19 +62,19 @@ FILE *xopen(CS& cmd, const char *ext, const char *how)
     for (i = 0;   i < BIGBUFLEN;   ) {
       char c = cmd.ctoc();
       if (!c || isspace(c)) {
-	break;
+        break;
       }
       if (c == '$') {untested(); 
-	sprintf(&(fname[i]), "%ld", static_cast<long>(time(0)));
-	i = strlen(fname);
+        sprintf(&(fname[i]), "%ld", static_cast<long>(time(0)));
+        i = strlen(fname.c_str());
       }else{				/* we want to add the extension	    */
-	fname[i++] = c;			/* if it doesn't already have one,  */
-	if (c == '.') {		/* as determined by a '.'	    */
-	  defalt = false;		/* not before the directory	    */
-	}else if (strchr(ENDDIR,c)) {	/* separator-terminator character   */
-	  itested();
-	  defalt = true;		/* '\' or '/' for msdos,	    */
-	}
+        fname[i++] = c;			/* if it doesn't already have one,  */
+        if (c == '.') {		/* as determined by a '.'	    */
+          defalt = false;		/* not before the directory	    */
+        }else if (strchr(ENDDIR,c)) {	/* separator-terminator character   */
+          itested();
+          defalt = true;		/* '\' or '/' for msdos,	    */
+        }
       }  				/* ']' or '/' for vms,		    */
     }					/* '/' for unix  (in ENDDIR)	    */
     cmd.skip(-1);
@@ -85,25 +86,26 @@ FILE *xopen(CS& cmd, const char *ext, const char *how)
     }
   }
   
-  trim(fname);
-  if (strlen(fname)==0) {
+  //trim(fname);
+  if (fname=="") {
     return NULL;
   }
 
   cmd.skipcom();
   
   FILE *code = NULL;	/* a file pointer for the file we found */
-  if (!OPT::clobber && (*how == 'w') && (access(fname,F_OK) == FILE_OK)) {untested();
-    char buffer[BUFLEN];
-    std::string msg = std::string(fname) + " exists.  replace? ";
-    getcmd(msg.c_str(), buffer, BUFLEN);
-    if (Umatch(buffer,"y{es} ")) {untested(); 	/* should be new file, but	    */
-      code = fopen(fname,how);		/* file already exists,  ask	    */
+  if (!OPT::clobber && (*how == 'w') && (access(fname.c_str(),F_OK) == FILE_OK)) {untested();
+    //char buffer[BUFLEN];
+    std::string msg = fname + " exists.  replace? ";
+    std::string line;
+    getcmd(msg.c_str(), line);
+    if (Umatch(line.c_str(),"y{es} ")) {untested(); 	/* should be new file, but	    */
+      code = fopen(fname.c_str(),how);		/* file already exists,  ask	    */
     }else{untested();
       return NULL;
     }
   }else{
-    code = fopen(fname,how);
+    code = fopen(fname.c_str(),how);
   }
   
   if (code) {

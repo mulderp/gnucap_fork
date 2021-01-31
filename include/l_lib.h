@@ -25,6 +25,7 @@
 #include "md.h"
 /*--------------------------------------------------------------------------*/
 	  char*		trim(char*);
+
 INTERFACE bool		Umatch(const std::string&, const std::string&);
 INTERFACE bool		wmatch(const std::string& s1,const std::string& s2);
 INTERFACE std::string	to_string(unsigned);
