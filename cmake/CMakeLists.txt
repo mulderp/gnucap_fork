@@ -1,0 +1,97 @@
+# (c) 2013, 2014 Kevin Zheng
+#     2017 Guilherme Brondani Torri
+#     2020 Felix Salfelder
+#     2020 Patrick Mulder
+# License: GPLv3+
+
+cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+project(gnucap)
+
+# Set project version information.
+# BUG: get from patchlev.h
+set(VERSION "2013-04-23")
+
+set(CMAKE_CXX_STANDARD 11)
+
+# Set configuration options.
+option(DOCS "Build and install documentation" OFF)
+#option(READLINE "Support command-line editing" ON)
+option(CHECK "Enable regression testing" OFF)
+
+# Set standard installation paths.
+include(GNUInstallDirs)
+
+# Use Git and the current repository to determine revision information.
+find_package(Git)
+
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git/HEAD")
+    execute_process(COMMAND "git" "rev-parse" "HEAD"
+        OUTPUT_VARIABLE GIT_COMMIT)
+    string(STRIP "${GIT_COMMIT}" GIT_COMMIT)
+    execute_process(COMMAND "git" "describe"
+        OUTPUT_VARIABLE GIT_TAG ERROR_QUIET)
+    string(STRIP "${GIT_TAG}" GIT_TAG)
+    execute_process(COMMAND "git" "rev-parse" "--abbrev-ref" "HEAD"
+        OUTPUT_VARIABLE GIT_BRANCH)
+    string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
+endif()
+
+# Enable regression testing (if enabled).
+if(CHECK)
+    enable_testing()
+endif()
+
+# Check for command-line editing libraries (readline and termcap).
+include(CheckLibraryExists)
+
+# TODO: switch readline
+##if(READLINE)
+##    check_library_exists(readline readline "" HAVE_LIBREADLINE)
+##    check_library_exists(termcap tgetent "" HAVE_LIBTERMCAP)
+##    set(READLINE_LIBS "readline")
+##endif()
+
+# Check for dynamic library support (dlopen).
+include(FindDL.cmake)
+include(readlist.cmake)
+
+if(DL_FOUND)
+    set(HAVE_DLFCN_H true)
+    set(HAVE_LIBDL true)
+endif()
+
+# TODO: Check for local modelgen if cross-compiling.
+
+# set GNUCAP_PLUGPATH
+set(pkglibdir "${CMAKE_INSTALL_FULL_LIBDIR}/gnucap")
+
+# Write configuration to header file.
+configure_file(
+    "${PROJECT_SOURCE_DIR}/../main/config.h.in"
+    "${PROJECT_BINARY_DIR}/main/config.h"
+    )
+set(GENERATED_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+# configure RPATH
+set(CMAKE_MACOSX_RPATH FALSE)  # don't use RPATH for MacOSX
+SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR}) # Linux set full path to library
+
+# Tell the compiler where to find the header files.
+include_directories(${PROJECT_BINARY_DIR})
+include_directories(../include)
+include_directories(../linenoise)
+
+
+# Build in subdirectories.
+add_subdirectory(apps)
+add_subdirectory(include)
+add_subdirectory(lib)
+add_subdirectory(main)
+add_subdirectory(modelgen)
+
+# Build an installation package.
+include(InstallRequiredSystemLibraries)
+set(CPACK_GENERATOR "TGZ")
+set(CPACK_PACKAGE_VERSION "${VERSION}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+include(CPack)

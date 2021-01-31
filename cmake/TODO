@@ -1,0 +1,4 @@
+- COPYING is in the wrong place
+- use correct version number
+- need to install gnucap-conf and rc
+- rpath/runpath does not work properly

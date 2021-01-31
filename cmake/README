@@ -1,0 +1,7 @@
+Build Gnucap with CMake
+
+$ cd ..
+$ mkdir build
+$ cd build
+$ cmake ../cmake
+$ make

@@ -1,3 +1,9 @@
+# gnucap fork
+
+This is a fork of Gnucap.
+It does not depend on the readline lib, instead it uses the [linenoise](https://github.com/antirez/linenoise) library.
+
+####
 Readme for development snapshot 2013-04-23
 
 This is a development snapshot.  As such, there may be problems due to
